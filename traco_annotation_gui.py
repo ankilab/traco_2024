@@ -394,8 +394,8 @@ class Main(QMainWindow):
                     e = {
                         't': i,
                         'hexbug': j,
-                        'x': r.pos[1],
-                        'y': r.pos[0]
+                        'x': r.pos[0],
+                        'y': r.pos[1]
                     }
 
                     if r.shown:
