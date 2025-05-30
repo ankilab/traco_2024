@@ -79,6 +79,16 @@ class ImageView(pg.ImageView):
         pos = e.pos()
         xy = self.getImageItem().mapFromScene(pos.x(), pos.y())
         modifiers = QApplication.keyboardModifiers()
+        
+        # Check if click is inside the image area
+        # Prevents:
+        # 1) Assigning the ROI to the click on the timeline for the very first frame (when reading from an existing .traco file)
+        # 2) Assigning out of bounds clicks
+        image_item = self.getImageItem()
+        if not image_item.boundingRect().contains(xy):
+            # Pass event to base class (for timeline, etc.)
+            super().mousePressEvent(e)
+            return
 
         # Set posterior point
         if e.button() == Qt.MouseButton.LeftButton:
@@ -394,14 +404,17 @@ class Main(QMainWindow):
                     e = {
                         't': i,
                         'hexbug': j,
-                        'x': r.pos[1],
-                        'y': r.pos[0]
+                        'x': r.pos[0],
+                        'y': r.pos[1]
                     }
 
                     if r.shown:
                         tmp.append(e)
 
-            pd.DataFrame(tmp).to_csv(fn)
+            # Output in consistent order
+            df = pd.DataFrame(tmp)
+            df = df.sort_values(['t', 'hexbug']).reset_index(drop=True)
+            df.to_csv(fn)
             
             QMessageBox.information(self, "Data exported.", f"Data saved at\n{fn}")
 
