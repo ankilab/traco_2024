@@ -411,7 +411,10 @@ class Main(QMainWindow):
                     if r.shown:
                         tmp.append(e)
 
-            pd.DataFrame(tmp).to_csv(fn)
+            # Output in consistent order
+            df = pd.DataFrame(tmp)
+            df = df.sort_values(['t', 'hexbug']).reset_index(drop=True)
+            df.to_csv(fn)
             
             QMessageBox.information(self, "Data exported.", f"Data saved at\n{fn}")
 
